@@ -1,13 +1,54 @@
 # HEWY (How Early Were You)
 
-* Innovators (2.5%) – Innovators are the first individuals to adopt an innovation. Innovators are willing to take risks, youngest in age, have the highest social class, have great financial lucidity, very social and have closest contact to scientific sources and interaction with other innovators. Risk tolerance has them adopting technologies which may ultimately fail. Financial resources help absorb these failures. (Rogers 1962 5th ed, p. 282)
+Mainnet address: 
 
-* Early Adopters (13.5%) – This is the second fastest category of individuals who adopt an innovation. These individuals have the highest degree of opinion leadership among the other adopter categories. Early adopters are typically younger in age, have a higher social status, have more financial lucidity, advanced education, and are more socially forward than late adopters. More discrete in adoption choices than innovators. Realize judicious choice of adoption will help them maintain central communication position (Rogers 1962 5th ed, p. 283).
+```
+terra1d0xll49762dc8dzz4tgrum7jxxhgsx2lawfmf7
+```
 
-* Early Majority (34%) – Individuals in this category adopt an innovation after a varying degree of time. This time of adoption is significantly longer than the innovators and early adopters. Early Majority tend to be slower in the adoption process, have above average social status, contact with early adopters, and seldom hold positions of opinion leadership in a system (Rogers 1962 5th ed, p. 283)
+Web UI: https://hewy.glitch.me
 
-* Late Majority (34%) – Individuals in this category will adopt an innovation after the average member of the society. These individuals approach an innovation with a high degree of skepticism and after the majority of society has adopted the innovation. Late Majority are typically skeptical about an innovation, have below average social status, very little financial lucidity, in contact with others in late majority and early majority, very little opinion leadership.
+## Background
 
-* Laggards (16%) – Individuals in this category are the last to adopt an innovation. Unlike some of the previous categories, individuals in this category show little to no opinion leadership. These individuals typically have an aversion to change-agents and tend to be advanced in age. Laggards typically tend to be focused on “traditions”, likely to have lowest social status, lowest financial fluidity, be oldest of all other adopters, in contact with only family and close friends, very little to no opinion leadership.
+<p align="center"><img src="https://ondigitalmarketing.com/wp-content/uploads/2012/01/640px-Diffusionofideas.png"></p>
 
 Source: https://ondigitalmarketing.com/learn/odm/foundations/5-customer-segments-technology-adoption/
+
+## Deploy logs 
+
+### init
+
+```
+height: 2127830
+txhash: DCD749B7D4DB976E0477502FB0C958D3529B9BB19BE2DEAA9E3EB3EE8871CA80
+codespace: ""
+code: 0
+data: ""
+rawlog: '[{"msg_index":0,"log":"","events":[{"type":"instantiate_contract","attributes":[{"key":"owner","value":"terra10zwy3xhhhacsd9tjqpas6wpfst5ztnetflugfd"},{"key":"code_id","value":"36"},{"key":"contract_address","value":"terra1d0xll49762dc8dzz4tgrum7jxxhgsx2lawfmf7"}]},{"type":"message","attributes":[{"key":"action","value":"instantiate_contract"},{"key":"module","value":"wasm"},{"key":"sender","value":"terra10zwy3xhhhacsd9tjqpas6wpfst5ztnetflugfd"}]}]}]'
+logs:
+- msgindex: 0
+  log: ""
+  events:
+  - type: instantiate_contract
+    attributes:
+    - key: owner
+      value: terra10zwy3xhhhacsd9tjqpas6wpfst5ztnetflugfd
+    - key: code_id
+      value: "36"
+    - key: contract_address
+      value: terra1d0xll49762dc8dzz4tgrum7jxxhgsx2lawfmf7
+  - type: message
+    attributes:
+    - key: action
+      value: instantiate_contract
+    - key: module
+      value: wasm
+    - key: sender
+      value: terra10zwy3xhhhacsd9tjqpas6wpfst5ztnetflugfd
+info: ""
+gaswanted: 113178
+gasused: 112309
+tx: null
+timestamp: ""
+```
+```

@@ -1,15 +1,9 @@
 use cosmwasm_std::{
     to_binary, Api, Binary, Env, Extern, HandleResponse, InitResponse, Querier, StdError,
-    StdResult, Storage, CanonicalAddr,
+    StdResult, Storage, CanonicalAddr, HumanAddr,
 };
-
-use crate::error::ContractError;
-use crate::msg::{CountResponse, HandleMsg, InitMsg, QueryMsg};
+use crate::msg::{CountResponse, PlaceResponse, HandleMsg, InitMsg, QueryMsg};
 use crate::state::{config, config_read, State};
-
-pub const PREFIX_CONFIG: &[u8] = b"config";
-
-pub const PREFIX_BALANCES: &[u8] = b"balances";
 
 pub fn init<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
@@ -45,9 +39,8 @@ pub fn try_increment<S: Storage, A: Api, Q: Querier>(
     let sender_address_raw = deps.api.canonical_address(&env.message.sender)?;
     let state = config_read(&deps.storage).load()?;
 
-    // TODO: How do I throw this error?
     if has_incremented(&sender_address_raw, &state) {
-        return Err(ContractError::UserAlreadyIncremented {});
+        return Err(StdError::Unauthorized {backtrace: None });
     }
     config(&mut deps.storage).update(|mut state| {
         state.count += 1;
@@ -69,6 +62,7 @@ pub fn try_reset<S: Storage, A: Api, Q: Querier>(
             return Err(StdError::unauthorized());
         }
         state.count = count;
+        state.users = vec![];
         Ok(state)
     })?;
     Ok(HandleResponse::default())
@@ -80,6 +74,7 @@ pub fn query<S: Storage, A: Api, Q: Querier>(
 ) -> StdResult<Binary> {
     match msg {
         QueryMsg::GetCount {} => to_binary(&query_count(deps)?),
+        QueryMsg::GetPlace { address } => to_binary(&query_place(deps, address)?),
     }
 }
 
@@ -90,6 +85,18 @@ fn has_incremented(user: &CanonicalAddr, state: &State) -> bool {
 fn query_count<S: Storage, A: Api, Q: Querier>(deps: &Extern<S, A, Q>) -> StdResult<CountResponse> {
     let state = config_read(&deps.storage).load()?;
     Ok(CountResponse { count: state.count })
+}
+
+fn query_place<S: Storage, A: Api, Q: Querier>(deps: &Extern<S, A, Q>, user: HumanAddr) -> StdResult<PlaceResponse> {
+    let user_address_raw = deps.api.canonical_address(&user)?.clone();
+    let state = config_read(&deps.storage).load()?;
+    let users = state.users.clone();
+    let index = users.iter().position(|r| *r == user_address_raw);
+    if index == None {
+        return Err(StdError::Unauthorized { backtrace: None });
+    }
+    // Index is zero based, but we want place to start at 1.
+    Ok(PlaceResponse { place: index.unwrap() + 1 })
 }
 
 #[cfg(test)]
@@ -125,6 +132,7 @@ mod tests {
 
         // beneficiary can release it
         let env = mock_env("anyone", &coins(2, "token"));
+        let sender = env.clone().message.sender;
         let msg = HandleMsg::Increment {};
         let _res = handle(&mut deps, env, msg).unwrap();
 
@@ -132,6 +140,35 @@ mod tests {
         let res = query(&deps, QueryMsg::GetCount {}).unwrap();
         let value: CountResponse = from_binary(&res).unwrap();
         assert_eq!(18, value.count);
+
+        let res = query(&deps, QueryMsg::GetPlace { address: sender }).unwrap();
+        let value: PlaceResponse = from_binary(&res).unwrap();
+        assert_eq!(1, value.place);
+    }
+
+    #[test]
+    fn increment_twice() {
+        let mut deps = mock_dependencies(20, &coins(2, "token"));
+
+        let msg = InitMsg { count: 0 };
+        let env = mock_env("creator", &coins(2, "token"));
+        let _res = init(&mut deps, env, msg).unwrap();
+
+        // beneficiary can release it
+        let env = mock_env("anyone", &coins(2, "token"));
+        let msg = HandleMsg::Increment {};
+        let _res = handle(&mut deps, env, msg).unwrap();
+
+        // This should fail to increment.
+        let env2 = mock_env("anyone", &coins(2, "token"));
+        let msg2 = HandleMsg::Increment {};
+        // TODO: It would be nice to assert on the error.
+        let _res2 = handle(&mut deps, env2, msg2);
+
+        // should increase counter by 1
+        let res = query(&deps, QueryMsg::GetCount {}).unwrap();
+        let value: CountResponse = from_binary(&res).unwrap();
+        assert_eq!(1, value.count);
     }
 
     #[test]
